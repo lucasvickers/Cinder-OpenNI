@@ -20,11 +20,11 @@ namespace cinder {
             ImageSourceRef getDepthImage();
             ImageSourceRef getRawDepthImage();
             ImageSourceRef getColorImage();
-            gl::Texture & getDepthTex();
-            gl::Texture & getRawDepthTex();
-            gl::Texture & getColorTex();
-            Vec2i getDepthSize(){ return getFrameData( depthIndex ).size; }
-            Vec2i getColorSize(){ return getFrameData( colorIndex ).size; }
+            gl::TextureRef & getDepthTex();
+            gl::TextureRef & getRawDepthTex();
+            gl::TextureRef & getColorTex();
+            ivec2 getDepthSize(){ return getFrameData( depthIndex ).size; }
+            ivec2 getColorSize(){ return getFrameData( colorIndex ).size; }
 
             enum SENSORS {
                 SENSOR_DEPTH = 0x1,
@@ -41,18 +41,18 @@ namespace cinder {
 
             class FrameDataAbstract {
             public:
-                FrameDataAbstract( Vec2i size );
+                FrameDataAbstract( ivec2 size );
 
-                Vec2i size;
-                gl::Texture tex;
+                ivec2 size;
+                gl::TextureRef tex;
                 ImageSourceRef imageRef;
                 bool isImageFresh, isTexFresh;
-                void initTexture( Vec2i size );
+                void initTexture( ivec2 size );
             };
 
             class FrameData : public FrameDataAbstract {
             public:
-                FrameData( _openni::VideoStream &stream, Vec2i size );
+                FrameData( _openni::VideoStream &stream, ivec2 size );
 
                 _openni::VideoStream &stream;
                 _openni::VideoFrameRef frameRef;

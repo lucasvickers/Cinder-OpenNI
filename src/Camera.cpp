@@ -1,6 +1,6 @@
 #include "CinderOpenNI.h"
 #include "CinderOpenNI/Camera.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 
 
 namespace cinder { namespace openni {
@@ -65,7 +65,7 @@ namespace cinder { namespace openni {
 
 
         _openni::VideoMode mode = stream.getVideoMode();
-        Vec2i size = Vec2i( mode.getResolutionX(), mode.getResolutionY() );
+        ivec2 size = ivec2( mode.getResolutionX(), mode.getResolutionY() );
 
         int index = all.size();
         all.push_back( FrameData( stream, size ) );
@@ -163,21 +163,21 @@ namespace cinder { namespace openni {
         return frame.imageRef;
     }
 
-    gl::Texture & Camera::getDepthTex()
+    gl::TextureRef & Camera::getDepthTex()
     {
         scaledDepthFrameData.updateOriginal( &getFrameData(depthIndex) );
         scaledDepthFrameData.updateTex< uint8_t, ImageSourceDepth, _openni::DepthPixel >();
         return scaledDepthFrameData.tex;
     }
 
-    gl::Texture & Camera::getRawDepthTex()
+    gl::TextureRef & Camera::getRawDepthTex()
     {
         FrameData &frame = getFrameData( depthIndex );
         frame.updateTex< _openni::DepthPixel, ImageSourceRawDepth >();
         return frame.tex;
     }
 
-    gl::Texture & Camera::getColorTex()
+    gl::TextureRef & Camera::getColorTex()
     {
         FrameData &frame = getFrameData( colorIndex );
         frame.updateTex< _openni::RGB888Pixel, ImageSourceColor >();
@@ -192,22 +192,22 @@ namespace cinder { namespace openni {
     /**************************************************************************
      * FrameDataAbstract
      */
-    Camera::FrameDataAbstract::FrameDataAbstract( Vec2i size ) :
+    Camera::FrameDataAbstract::FrameDataAbstract( ivec2 size ) :
     isImageFresh( false ), isTexFresh( false ),
 	size( size )
     {
     }
 
-    void Camera::FrameDataAbstract::initTexture( Vec2i _size )
+    void Camera::FrameDataAbstract::initTexture( ivec2 _size )
     {
         imageRef = ImageSourceRef( Surface8u(_size.x, _size.y, false) );
-        tex = gl::Texture( imageRef );
+		tex = gl::Texture::create( imageRef );
     }
 
     /**************************************************************************
      * FrameData
      */
-    Camera::FrameData::FrameData( _openni::VideoStream &stream, Vec2i size ) :
+    Camera::FrameData::FrameData( _openni::VideoStream &stream, ivec2 size ) :
     stream(stream),
     FrameDataAbstract( size )
     {
@@ -230,7 +230,7 @@ namespace cinder { namespace openni {
         if ( isTexFresh ) return;
 
         updateImage< pixel_t, image_t >();
-        tex = gl::Texture( imageRef );
+		tex = gl::Texture::create( imageRef );
         isTexFresh = true;
     }
 
@@ -239,7 +239,7 @@ namespace cinder { namespace openni {
      */
     Camera::DerivedFrameData::DerivedFrameData() :
     original( NULL ),
-    FrameDataAbstract( Vec2i::zero() ),
+    FrameDataAbstract( ivec2() ),
     convertedData( NULL )
     {
     }
@@ -277,7 +277,7 @@ namespace cinder { namespace openni {
         if ( isTexFresh ) return;
 
         updateImage< pixel_t, image_t, original_pixel_t >();
-        tex = gl::Texture( imageRef );
+		tex = gl::Texture::create( imageRef );
         isTexFresh = true;
     }
 
